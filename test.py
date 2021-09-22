@@ -62,7 +62,7 @@ def test(data,
 
     # Configure
     model.eval()
-    with open(data) as f:
+    with open(data) as f:#open coco.yaml
         data = yaml.load(f, Loader=yaml.FullLoader)  # model dict
     nc = 1 if single_cls else int(data['nc'])  # number of classes
     iouv = torch.linspace(0.5, 0.95, 10).to(device)  # iou vector for mAP@0.5:0.95
@@ -225,7 +225,8 @@ def test(data,
             from pycocotools.cocoeval import COCOeval
 
             imgIds = [int(Path(x).stem) for x in dataloader.dataset.img_files]
-            cocoGt = COCO(glob.glob('../coco/annotations/instances_val*.json')[0])  # initialize COCO ground truth api
+            #cocoGt = COCO(glob.glob('../coco/annotations/instances_val*.json')[0])  # initialize COCO ground truth api
+            cocoGt = COCO(glob.glob('/DATA8T/Dataset/coco/annotations/instances_val*.json')[0]) 
             cocoDt = cocoGt.loadRes(f)  # initialize COCO pred api
             cocoEval = COCOeval(cocoGt, cocoDt, 'bbox')
             cocoEval.params.imgIds = imgIds  # image IDs to evaluate
@@ -246,8 +247,8 @@ def test(data,
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='test.py')
-    parser.add_argument('--weights', nargs='+', type=str, default='yolov4-p5.pt', help='model.pt path(s)')
-    parser.add_argument('--data', type=str, default='data/coco128.yaml', help='*.data path')
+    parser.add_argument('--weights', nargs='+', type=str, default='../YOLOmodels/yolov4-p5.pt', help='model.pt path(s)')
+    parser.add_argument('--data', type=str, default='data/mycoco.yaml', help='*.data path')
     parser.add_argument('--batch-size', type=int, default=32, help='size of each image batch')
     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float, default=0.001, help='object confidence threshold')
