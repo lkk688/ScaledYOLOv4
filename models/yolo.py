@@ -138,8 +138,9 @@ class Model(nn.Module):
         m = self.model[-1]  # Detect() module
         for mi, s in zip(m.m, m.stride):  # from
             b = mi.bias.view(m.na, -1)  # conv.bias(255) to (3,85)
-            b[:, 4] += math.log(8 / (640 / s) ** 2)  # obj (8 objects per 640 image)
-            b[:, 5:] += math.log(0.6 / (m.nc - 0.99)) if cf is None else torch.log(cf / cf.sum())  # cls
+            with torch.no_grad():
+                b[:, 4] += math.log(8 / (640 / s) ** 2)  # obj (8 objects per 640 image)
+                b[:, 5:] += math.log(0.6 / (m.nc - 0.99)) if cf is None else torch.log(cf / cf.sum())  # cls
             mi.bias = torch.nn.Parameter(b.view(-1), requires_grad=True)
 
     def _print_biases(self):
@@ -250,11 +251,12 @@ if __name__ == '__main__':
     model = Model(opt.cfg).to(device)
     model.train()
 
+    # New enabled
     # Profile
     # img = torch.rand(8 if torch.cuda.is_available() else 1, 3, 640, 640).to(device)
     # y = model(img, profile=True)
 
-    # ONNX export
+    # # ONNX export
     # model.model[-1].export = True
     # torch.onnx.export(model, img, opt.cfg.replace('.yaml', '.onnx'), verbose=True, opset_version=11)
 

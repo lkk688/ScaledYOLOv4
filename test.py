@@ -247,7 +247,7 @@ def test(data,
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='test.py')
-    parser.add_argument('--weights', nargs='+', type=str, default='../YOLOmodels/yolov4-p5.pt', help='model.pt path(s)')
+    parser.add_argument('--weights', nargs='+', type=str, default='../YOLOmodels/yolov4-p7.pt', help='model.pt path(s)')
     parser.add_argument('--data', type=str, default='data/mycoco.yaml', help='*.data path')
     parser.add_argument('--batch-size', type=int, default=32, help='size of each image batch')
     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')

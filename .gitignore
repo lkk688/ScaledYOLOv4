@@ -9,3 +9,9 @@
 Thumbs.db
 
 *.pyc
+/runs
+*.jso\
+
+*.pt
+*.onnx
+*.mlmodel
