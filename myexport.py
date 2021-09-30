@@ -1,8 +1,11 @@
 import argparse
+from mish_cuda import MishCuda
 
 import torch
-
+import torch.nn as nn
 from utils.google_utils import attempt_download
+from models.yolo import Detect
+from models.common import Conv
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -17,15 +20,30 @@ if __name__ == '__main__':
     img = torch.zeros((opt.batch_size, 3, *opt.img_size))  # image size(1,3,640,640) iDetection
 
     # Load PyTorch model
-    # attempt_download(opt.weights)
-    # model = torch.load(opt.weights, map_location=torch.device('cpu'))['model'].float()
-    # model.eval()
-    # model.model[-1].export = True  # set Detect() layer export=True
-    # y = model(img)  # dry run
+    attempt_download(opt.weights)
+    model = torch.load(opt.weights, map_location=torch.device('cpu'))['model'].float()
+    model.eval()
+    model.model[-1].export = True  # set Detect() layer export=True
+
+
+    for k, m in model.named_modules():
+        if isinstance(m, Conv):  # assign export-friendly activations
+            print(m.act) #MishCuda()
+            # if isinstance(m.act, nn.SiLU):
+            #     m.act = SiLU()
+            if isinstance(m.act, MishCuda):
+                 m.act = nn.ReLU()
+        elif isinstance(m, Detect):
+            inplace = True
+            m.inplace = inplace
+            m.onnx_dynamic = False
+            # m.forward = m.forward_export  # assign forward (optional)
+
+    y = model(img)  # dry run
 
     # PyTorch Hub
-    model = torch.hub.load('ultralytics/yolov5', 'yolov5m6')  #  P6 model
-    results = model(img, size=640)  # inference at 640
+    # model = torch.hub.load('ultralytics/yolov5', 'yolov5m6')  #  P6 model
+    # results = model(img, size=640)  # inference at 640
 
 
     # ONNX export
