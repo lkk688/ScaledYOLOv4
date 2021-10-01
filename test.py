@@ -40,7 +40,7 @@ def test(data,
 
     else:  # called directly
         device = select_device(opt.device, batch_size=batch_size)
-        merge, save_txt = opt.merge, opt.save_txt  # use Merge NMS, save *.txt labels
+        merge, save_txt = opt.merge, opt.save_txt  # use Merge NMS, save *.txt labels /False, False
         if save_txt:
             out = Path('inference/output')
             if os.path.exists(out):
@@ -64,13 +64,13 @@ def test(data,
     model.eval()
     with open(data) as f:#open coco.yaml
         data = yaml.load(f, Loader=yaml.FullLoader)  # model dict
-    nc = 1 if single_cls else int(data['nc'])  # number of classes
+    nc = 1 if single_cls else int(data['nc'])  # number of classes, 80
     iouv = torch.linspace(0.5, 0.95, 10).to(device)  # iou vector for mAP@0.5:0.95
     niou = iouv.numel()
 
     # Dataloader
     if not training:
-        img = torch.zeros((1, 3, imgsz, imgsz), device=device)  # init img
+        img = torch.zeros((1, 3, imgsz, imgsz), device=device)  # init img [1,3,640,640]
         _ = model(img.half() if half else img) if device.type != 'cpu' else None  # run once
         path = data['test'] if opt.task == 'test' else data['val']  # path to val/test images
         dataloader = create_dataloader(path, imgsz, batch_size, model.stride.max(), opt,
@@ -247,7 +247,7 @@ def test(data,
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='test.py')
-    parser.add_argument('--weights', nargs='+', type=str, default='../YOLOmodels/yolov4-p7.pt', help='model.pt path(s)')
+    parser.add_argument('--weights', nargs='+', type=str, default='../YOLOmodels/mytrainedYOLOv5sinscaledyolov4.pt', help='model.pt path(s)')
     parser.add_argument('--data', type=str, default='data/mycoco.yaml', help='*.data path')
     parser.add_argument('--batch-size', type=int, default=32, help='size of each image batch')
     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
@@ -263,7 +263,7 @@ if __name__ == '__main__':
     parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')
     opt = parser.parse_args()
     opt.save_json |= opt.data.endswith('coco.yaml')
-    opt.data = check_file(opt.data)  # check file
+    opt.data = check_file(opt.data)  # check file data/mycoco.yaml
     print(opt)
 
     if opt.task in ['val', 'test']:  # run normally
